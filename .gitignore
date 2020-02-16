@@ -1,0 +1,7 @@
+__pycache__/
+env/
+Dados_In/*
+Dados_Out/*
+.vscode/
+
+Parser/build/*
