@@ -1,0 +1,16 @@
+FROM centos
+
+RUN yum update  -y
+RUN yum install -y python3-devel
+RUN yum install -y gcc-gfortran
+
+RUN yum gcc --version
+RUN yum gfortran --version
+
+RUN mkdir /pipeline
+COPY . /pipeline
+WORKDIR /pipeline
+
+RUN ./install.sh
+
+CMD ["python3", "pipeline.py"]
