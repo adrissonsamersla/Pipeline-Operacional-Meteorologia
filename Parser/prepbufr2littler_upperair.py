@@ -1,3 +1,5 @@
+import os
+
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -158,8 +160,6 @@ def prepbufr2littler_upperair(arquivo_prepbufr: str, arquivo_littler: str):
                 elif headers[4] >= 223 and headers[4] <= 228:
                     altitude = observations[3,level] # use zob, not station elev
 
-
-
                 # Mais uma validação: verifica se a observação não é repetida.
                 # Usa um identificador composto por: 
                 #     Id da estacao: headers[0].tostring()
@@ -168,6 +168,8 @@ def prepbufr2littler_upperair(arquivo_prepbufr: str, arquivo_littler: str):
                 identificador_observacao = "%s %3i %6.2f %6.2f %9.5f %5i %6.1f" % \
                     (headers[0].tostring(), headers[4], longitude, latitude, hora, int(altitude), pressao)
                 
+
+
                 # Se o identificador estiver no conjunto de identificadores, ele já 
                 # apareceu alguma vez portanto é repetido. Set é uma estrutura de dados
                 # que não aceita repetição.
@@ -176,6 +178,8 @@ def prepbufr2littler_upperair(arquivo_prepbufr: str, arquivo_littler: str):
                 else:
                     print('Ignorando observacao: {}'.format(identificador_observacao))
                     continue
+
+
 
                 if (type(observations[0,level]) == np.ma.core.MaskedConstant):
                     parser.set_obs_pressure(index_level)
@@ -212,23 +216,33 @@ def prepbufr2littler_upperair(arquivo_prepbufr: str, arquivo_littler: str):
                 else:
                     parser.set_obs_wind_direction(index_level, observations[15,level])
 
-                parser.set_obs_wind_ew(index_level)
-                parser.set_obs_wind_ns(index_level)
+                
+
+                if (type(observations[4,level]) == np.ma.core.MaskedConstant):
+                    parser.set_obs_wind_ew(index_level)
+                else:
+                    parser.set_obs_wind_ew(index_level, observations[4,level])
+
+                if (type(observations[5,level]) == np.ma.core.MaskedConstant):
+                    parser.set_obs_wind_ns(index_level)
+                else:
+                    parser.set_obs_wind_ns(index_level, observations[5,level])
+
                 parser.set_obs_relative_humidity(index_level)
                 parser.set_obs_thickness(index_level)
-
-                # Método mais importante: ele escreve a mensagem setada
-                # no arquivo de destino, em littler.
-                parser.dump_littler(littler)
 
                 # A partir daqui, esse level/observação é válido! 
                 index_level += 1
 
+            # Método mais importante: ele escreve a mensagem setada
+            # no arquivo de destino, em littler.
+            parser.dump_littler(littler)
+
             # Acumula o número de observações desse subset para a mensagem
             numero_observacoes_mensagem += index_level
 
-        print('Escrevendo mensagem {:d} de {:d}, com {:d} observacoes e cujo tipo eh {:s}'.format(
-            index_mensagem, numero_mensagens, numero_observacoes_mensagem, prepbufr.msg_type
+        print('{}: Escrevendo mensagem {:d} de {:d}, com {:d} observacoes e cujo tipo eh {:s}'.format(
+            os.path.basename(arquivo_littler), index_mensagem, numero_mensagens, numero_observacoes_mensagem, prepbufr.msg_type
         ))
 
     # Fecha todos os arquivos usados

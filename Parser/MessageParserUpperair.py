@@ -5,25 +5,12 @@ from typing import IO
     It's reponsible for parsing the message into LITTLER format.
 """
 class MessageParserUpperair:
-    allowed_types = ['ADPUPA','AIRCFT']
+    allowed_types = ['ADPUPA','AIRCAR','AIRCFT']
 
     left_pw_out = True
 
     # 31 fields (last one will be left out)
-    headers = [""] * 31
-
-    # Semifinal line, it is roughly the same 
-    final_line = \
-        "-777777.00000      0" + \
-        "-777777.00000      0" + \
-        "      1.00000      0" + \
-        "-888888.00000      0" + \
-        "-888888.00000      0" + \
-        "-888888.00000      0" + \
-        "-888888.00000      0" + \
-        "-888888.00000      0" + \
-        "-888888.00000      0" + \
-        "-888888.00000      0"      
+    headers = [""] * 31  
 
     # Last line, 
     verification_digits = "      1      0      0"
@@ -41,20 +28,17 @@ class MessageParserUpperair:
             raise ValueError("msg_type: {0} not in allowed_types: {1}.".format(msg_type, " ".join(allowed_types)))
         self.msg_type = msg_type
 
-        if (self.msg_type == "ADPSFC"):
-            if (msg_subtype == 181 or msg_subtype == 281 or msg_subtype == 183 or msg_subtype == 284):
-                self.sub_type = "FM-12 SYNOP"
-            elif (msg_subtype == 187 or msg_subtype == 287):
-                self.sub_type = "FM-16 METAR"
+        # ADPUPA: 120 122 132 220 221 222 232
+        # AIRCAR: 133 233
+        # AIRCFT: 130 131 230 231
+
+        if (self.msg_type == "ADPUPA"):
+            self.sub_type = "FM-35 TEMP"
+        elif (self.msg_type == "AIRCAR" or self.msg_type == "AIRCFT"):
+            if (msg_subtype == 130 or msg_subtype == 230):
+                self.sub_type = "FM-96 AIREP"
             else:
-                raise ValueError("ADPSFC : unexpected msg_subtype code: {}".format(msg_subtype))
-        elif (self.msg_type == "SFCSHP"):
-            if (msg_subtype == 180 or msg_subtype == 280 or msg_subtype == 183 or msg_subtype == 282 or msg_subtype == 284):
-                self.sub_type = "FM-18 BUOY"
-            elif (msg_subtype == 182):
-                self.sub_type = "FM-13 SHIP"
-            else:
-                raise ValueError("SFCSHP : unexpected msg_subtype code: {}".format(msg_subtype))
+                self.sub_type = "FM-35 TEMP"
         else:
             # Redundante: self.msg_type is in self.allowed_types
             raise ValueError("Unexpected msg_subtype code: {}".format(msg_type))
@@ -318,13 +302,32 @@ class MessageParserUpperair:
         if ("" in self.observations):
             raise Exception("A field in observation was not properly setted.")
 
+        number_observations = len(self.observations)
+
+        if (number_observations > 1):
+            self.sub_type = "FM-35 TEMP"
+        self.set_platform()
         header_line = "".join(self.headers)
-        obs_line = "\n".join(["".join(obs_line) for obs_line in self.observations]) + "\n"
+
+        obs_line = "\n".join(["".join(obs_line) for obs_line in self.observations])
+
+        verification_digits = "{:7d}{:7d}{:7d}".format(number_observations, 0, 0)
+
+        final_line = "-777777.00000      0" + \
+            "-777777.00000      0" + \
+            "{:13.5f}{:7d}".format(float(number_observations), 0) + \
+            "-888888.00000      0" + \
+            "-888888.00000      0" + \
+            "-888888.00000      0" + \
+            "-888888.00000      0" + \
+            "-888888.00000      0" + \
+            "-888888.00000      0" + \
+            "-888888.00000      0"
 
         lines.append(header_line)
         lines.append(obs_line)
-        lines.append(self.final_line)
-        lines.append(self.verification_digits)
+        lines.append(final_line)
+        lines.append(verification_digits)
 
         payload = "\n".join(lines) + "\n"
         return payload
