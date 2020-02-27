@@ -35,7 +35,7 @@ mnemonics_observation_error = 'POE QOE TOE ZOE WOE PWE'
 #     prepbufr
 
 
-def prepbufr2littler(arquivo_prepbufr: str, arquivo_littler: str):
+def prepbufr2littler_surface(arquivo_prepbufr: str, arquivo_littler: str):
     if arquivo_prepbufr == arquivo_littler:
         raise IOError('A sobrescrita de arquivo não é permitida: PREPBUFR e LITTLER devem ter nomes diferentes.')
 

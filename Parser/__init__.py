@@ -1,1 +1,2 @@
-from .prepbufr2littler import prepbufr2littler
+from .prepbufr2littler_surface import prepbufr2littler_surface
+from .prepbufr2littler_upperair import prepbufr2littler_upperair

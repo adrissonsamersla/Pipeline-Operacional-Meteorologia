@@ -20,6 +20,10 @@ def confere_status_arquivo(endereco_arquivo, tamanho_arquivo):
     sys.stdout.write('{:.3f} {:s}'.format(porcentagem_completado, '% Completado'))
     sys.stdout.flush()
 
+def lista_arquivos_descompactados():
+    return glob('Dados_In/*.nr/*')
+
+
 class Downloader:
     """
         Essa classe é responsável por fazer o download dos arquivos. 
@@ -130,7 +134,7 @@ class Downloader:
 
         self.remove_compactados()
 
-        return glob('Dados_In/*.nr/*')
+        return lista_arquivos_descompactados()
 
     def remove_compactados(self):
         for arquivo_targz in self.arquivos_compactados:
