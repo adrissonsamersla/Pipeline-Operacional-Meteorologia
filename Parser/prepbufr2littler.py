@@ -1,3 +1,5 @@
+import os
+
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -252,8 +254,8 @@ def prepbufr2littler(arquivo_prepbufr: str, arquivo_littler: str):
             # Acumula o número de observações desse subset para a mensagem
             numero_observacoes_mensagem += index_level
 
-        print('Escrevendo mensagem {:d} de {:d}, com {:d} observacoes e cujo tipo eh {:s}'.format(
-            index_mensagem, numero_mensagens, numero_observacoes_mensagem, prepbufr.msg_type
+        print('{}: Escrevendo mensagem {:d} de {:d}, com {:d} observacoes e cujo tipo eh {:s}'.format(
+            os.path.basename(arquivo_littler), index_mensagem, numero_mensagens, numero_observacoes_mensagem, prepbufr.msg_type
         ))
 
     # Fecha todos os arquivos usados
