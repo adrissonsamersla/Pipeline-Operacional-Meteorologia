@@ -42,7 +42,7 @@ else:
 
 url = 'https://rda.ucar.edu/cgi-bin/login'
 
-email = 'sadrianorod@gmail.com'
+email = '???????????????????'
 values = {'email' : email, 'passwd' : pswd, 'action' : 'login'}
 # Authenticate
 ret = requests.post(url,data=values)
